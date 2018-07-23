@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web;
 
 namespace CurrencyExchange.Models
@@ -33,7 +34,7 @@ namespace CurrencyExchange.Models
             {
                currencyData =  NBPApiConnection.GetCurrencyData( this.Code );
             }
-            catch( SystemException)
+            catch( WebException ex)
             {
                 return false;
             }

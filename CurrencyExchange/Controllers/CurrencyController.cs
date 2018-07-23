@@ -40,7 +40,9 @@ namespace CurrencyExchange.Controllers
             if (String.IsNullOrWhiteSpace(code))
                 return BadRequest();
 
-            var currency = _currencies.Where(curr => curr.Code == code).SingleOrDefault();
+            var currency = _currencies
+                .Where(curr => curr.Code == code)
+                .SingleOrDefault();
 
             if (currency == null)
                 return NotFound();
@@ -89,10 +91,17 @@ namespace CurrencyExchange.Controllers
             if (amount < 0)
                 return BadRequest();
 
-            var exchange = new ExchangeRequest() { From = from, To = to, Amount = amount.Value };
+            var exchange = new ExchangeRequest() {
+                From = from, To = to, Amount = amount.Value
+            };
 
-            var  FromCurrency = _currencies.Where(curr => curr.Code.Equals(exchange.From)).SingleOrDefault();
-            var  ToCurrency = _currencies.Where(curr => curr.Code.Equals(exchange.To)).SingleOrDefault();
+            var  FromCurrency = _currencies
+                .Where(curr => curr.Code.Equals(exchange.From))
+                .SingleOrDefault();
+
+            var  ToCurrency = _currencies
+                .Where(curr => curr.Code.Equals(exchange.To))
+                .SingleOrDefault();
 
             if (FromCurrency == null || ToCurrency == null)
                 return NotFound();
@@ -103,13 +112,14 @@ namespace CurrencyExchange.Controllers
             if (!ToCurrency.IsUpToDate())
                 ToCurrency.Update();
 
-            var exchangeResponse = new ExchangeResponse() { Request = exchange };
+            var exchangeResponse = new ExchangeResponse() {
+                Request = exchange
+            };
 
             exchangeResponse.Ratio = FromCurrency.Rate / ToCurrency.Rate;
             exchangeResponse.Result = exchangeResponse.Ratio * exchange.Amount;
 
             return Ok( exchangeResponse );
-
         }
 
 

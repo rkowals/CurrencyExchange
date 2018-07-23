@@ -25,14 +25,13 @@ namespace CurrencyExchange.NBPApi
             {
                 LogRequest(response);
 
-            using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string jsonResponse = reader.ReadToEnd();
-                    return JsonConvert.DeserializeObject<NBPCurrencyRatesResponse>(jsonResponse);
-
+                using (Stream stream = response.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string jsonResponse = reader.ReadToEnd();
+                        return JsonConvert.DeserializeObject<NBPCurrencyRatesResponse>(jsonResponse);
+                    }
                 }
-            }
         }
 
 
