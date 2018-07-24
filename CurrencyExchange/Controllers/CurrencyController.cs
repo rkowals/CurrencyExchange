@@ -13,7 +13,7 @@ namespace CurrencyExchange.Controllers
     public class CurrencyController : ApiController
     {
 
-        private IEnumerable<Currency> _currencies = new List<Currency>()
+        private static IEnumerable<Currency> _currencies = new List<Currency>()
         {
             new Currency(){ Name = "dolar amerykański", Code = "usd", Rate = 1.23  },
             new Currency(){ Name = "euro", Code = "eur", Rate = 2.655  },
@@ -45,7 +45,7 @@ namespace CurrencyExchange.Controllers
                 .SingleOrDefault();
 
             if (currency == null)
-                return NotFound();
+                return BadRequest($"Currency not found: {code}");
 
             return Ok(currency);
         }
@@ -63,11 +63,6 @@ namespace CurrencyExchange.Controllers
         [Route("currency")]
         public IHttpActionResult AllCurrenciesRates()
         {
-
-            foreach (var currency in _currencies)
-                if (!currency.IsUpToDate())
-                    currency.Update();
-
             return Ok( _currencies );
         }
 
@@ -86,31 +81,32 @@ namespace CurrencyExchange.Controllers
         {
 
             if (String.IsNullOrWhiteSpace(from) || String.IsNullOrWhiteSpace(to) || !amount.HasValue)
-                return BadRequest();
+                return BadRequest("Invalid parameters.");
 
             if (amount < 0)
-                return BadRequest();
+                return BadRequest("Amount must be a positive number.");
 
             var exchange = new ExchangeRequest() {
-                From = from, To = to, Amount = amount.Value
+                From = from,
+                To = to,
+                Amount = amount.Value
             };
 
             var  FromCurrency = _currencies
                 .Where(curr => curr.Code.Equals(exchange.From))
                 .SingleOrDefault();
 
+            if (FromCurrency == null)
+                return BadRequest($"Unknown currency: {exchange.From}");
+
             var  ToCurrency = _currencies
                 .Where(curr => curr.Code.Equals(exchange.To))
                 .SingleOrDefault();
 
-            if (FromCurrency == null || ToCurrency == null)
-                return NotFound();
+            if (ToCurrency == null)
+                return BadRequest($"Unknown currency: {exchange.To}");
 
-            if (!FromCurrency.IsUpToDate())
-                FromCurrency.Update();
 
-            if (!ToCurrency.IsUpToDate())
-                ToCurrency.Update();
 
             var exchangeResponse = new ExchangeResponse() {
                 Request = exchange

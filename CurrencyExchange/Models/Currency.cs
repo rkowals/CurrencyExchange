@@ -11,24 +11,42 @@ namespace CurrencyExchange.Models
     {
         public string Name { get; set; }
         public string Code { get; set; }
-        public double Rate { get; set; }
+        
+        private DateTime _date = new DateTime(2000, 1, 1);
+        private DateTime _lastUpdateTry;
 
-        private DateTime _date;
+        private double _rate;
 
-        public Currency()
+        public double Rate
         {
-            this._date = new DateTime(2000, 1, 1);
+            get
+            {
+                var k = 8;
+                if ( (IsUpToDate() == false) && (HoursFromLastUpdateTry() >= 1))
+                    this.Update();
+
+                return _rate;
+
+            }
+
+            set
+            {
+                this._rate = value;
+            }
         }
+
+        private double HoursFromLastUpdateTry() => DateTime.Now.Subtract( this._lastUpdateTry).TotalHours;
 
 
         public bool IsUpToDate()
         {
-                return DateTime.Now.Subtract( this._date ).Hours > 12 ;
+            return DateTime.Now.Subtract(this._date).TotalDays < 1.0;
         }
 
         public bool Update()
         {
             NBPCurrencyRatesResponse currencyData;
+            this._lastUpdateTry = DateTime.Now;
 
             try
             {
@@ -43,8 +61,6 @@ namespace CurrencyExchange.Models
             this.Rate = currencyData.Rates.First().Mid;
             this._date = currencyData.Rates.First().EffectiveDate;
             return true;
-
-
         }
 
 
